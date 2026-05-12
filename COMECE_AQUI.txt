@@ -1,0 +1,206 @@
+╔════════════════════════════════════════════════════════════════╗
+║                                                                ║
+║         🎫 QR ETIQUETA ARGOX - PLUGIN WORDPRESS 🎫            ║
+║                                                                ║
+║        Gerador de QR Code para Etiqueta 106x52mm              ║
+║                                                                ║
+╚════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════
+📂 ESTRUTURA DE ARQUIVOS
+═══════════════════════════════════════════════════════════════════
+
+c:\RelogioPonto\QR\
+│
+├── ✅ qr-etiqueta-plugin/              (PLUGIN PRONTO PARA USAR!)
+│   ├── qr-etiqueta.php                 (Arquivo principal)
+│   ├── README.md                        (Documentação completa)
+│   ├── validate-plugin.php              (Validador)
+│   ├── assets/                          (CSS/JavaScript)
+│   ├── includes/                        (Lógica PHP)
+│   └── templates/                       (HTML/Templates)
+│
+├── 📖 INSTALACAO_RAPIDA.md             (LEIA PRIMEIRO!)
+├── 📋 RESUMO_PLUGIN.md                 (Visão geral)
+├── 📦 criar-zip.bat                    (Windows: Compactar plugin)
+└── 📦 criar-zip.ps1                    (PowerShell: Compactar)
+
+═══════════════════════════════════════════════════════════════════
+🚀 INSTALAÇÃO RÁPIDA (3 PASSOS)
+═══════════════════════════════════════════════════════════════════
+
+PASSO 1: COPIAR O PLUGIN
+  └─ Copie "qr-etiqueta-plugin" para:
+     wp-content/plugins/qr-etiqueta-plugin/
+
+PASSO 2: ATIVAR NO WORDPRESS
+  └─ Admin WordPress:
+     Plugins > Plugins Instalados
+     > QR Etiqueta Argox > Ativar
+
+PASSO 3: USAR
+  └─ QR Etiqueta > Gerar QR
+     > Digite código de 10 dígitos
+     > Clique "Gerar QR Code"
+     > Clique "Imprimir Etiqueta"
+
+═══════════════════════════════════════════════════════════════════
+📋 CHECKLIST DE INSTALAÇÃO
+═══════════════════════════════════════════════════════════════════
+
+[ ] 1. Plugin copiado para wp-content/plugins/
+[ ] 2. WordPress acessível
+[ ] 3. Plugin ativado (apareceu menu QR Etiqueta)
+[ ] 4. Formulário aparece em "QR Etiqueta > Gerar QR"
+[ ] 5. Testado with "1234567890"
+[ ] 6. QR code gerado sem erros
+[ ] 7. Impressora Argox 2140 configurada
+[ ] 8. Testada impressão de uma etiqueta
+
+═══════════════════════════════════════════════════════════════════
+⚙️  CONFIGURAÇÃO DA IMPRESSORA ARGOX 2140
+═══════════════════════════════════════════════════════════════════
+
+WINDOWS (Painel de Controle):
+  Dispositivos e Impressoras
+  > Argox 2140 (clique direito)
+  > Preferências de Impressão
+
+CONFIGURAR ASSIM:
+  ✓ Tipo de papel: Personalizado 106x52mm
+  ✓ Orientação: Paisagem
+  ✓ Margens: Nenhuma
+  ✓ Qualidade: Máxima
+  ✓ Zoom: 100%
+
+═══════════════════════════════════════════════════════════════════
+📱 COMO USAR O PLUGIN
+═══════════════════════════════════════════════════════════════════
+
+COMO ADMINISTRADOR:
+
+  1️⃣ Gerar QR Code
+     QR Etiqueta > Gerar QR
+     └─ Digite: 1234567890
+     └─ Clique: "Gerar QR Code"
+     └─ QR aparece na visualização
+
+  2️⃣ Imprimir Colinha
+     └─ Clique: "Imprimir Etiqueta"
+     └─ Abre página de impressão
+     └─ Ctrl+P > Configure > Imprima
+
+  3️⃣ Ver Histórico
+     QR Etiqueta > Histórico
+     └─ Tabela com todos os códigos
+     └─ Botão para reimprimir
+
+  4️⃣ Configurações
+     QR Etiqueta > Configurações
+     └─ Instruções
+     └─ Dicas práticas
+     └─ Requisitos
+
+EM PÁGINA/POST (Para Usuários):
+
+  [qr_etiqueta]
+
+═══════════════════════════════════════════════════════════════════
+🧪 VALIDAÇÃO E TESTES
+═══════════════════════════════════════════════════════════════════
+
+TESTE 1: Plugin Ativa
+  ✓ Menu "QR Etiqueta" aparece no admin? SIM/NÃO
+
+TESTE 2: Gerar QR Code
+  ✓ Código de teste: 1234567890
+  ✓ QR code aparece? SIM/NÃO
+  ✓ Sem erros? SIM/NÃO
+
+TESTE 3: Impressão
+  ✓ Página abre sem erros? SIM/NÃO
+  ✓ Etiqueta sai formatada? SIM/NÃO
+  ✓ QR escaneia? SIM/NÃO
+
+TESTE 4: Histórico
+  ✓ Código aparece no histórico? SIM/NÃO
+  ✓ Pode reimprimir? SIM/NÃO
+
+═══════════════════════════════════════════════════════════════════
+❌ TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════════
+
+PROBLEMA: Menu não aparece
+  ✓ Solução: Recarregar página / Ativar plugin
+
+PROBLEMA: Erro ao gerar QR
+  ✓ Solução: Internet desligada? Verificar conexão
+  ✓ Solução: Código não tem 10 dígitos exatamente?
+
+PROBLEMA: Impressão sai pequena
+  ✓ Solução: Abrir print (Ctrl+P)
+  ✓ Margens: Nenhuma
+  ✓ Tamanho: 106x52mm (personalizado)
+  ✓ Escala: 100%
+
+PROBLEMA: QR não escaneia
+  ✓ Solução: Aumentar qualidade de impressão
+  ✓ Solução: Usar etiquetas de melhor qualidade
+  ✓ Solução: Testar em navegador diferente
+
+═══════════════════════════════════════════════════════════════════
+📊 ESPECIFICAÇÕES TÉCNICAS
+═══════════════════════════════════════════════════════════════════
+
+PLUGIN:
+  Nome: QR Etiqueta Argox
+  Versão: 1.0.0
+  Autor: Admin
+  Licença: GPL v2 ou posterior
+
+REQUISITOS:
+  WordPress: 5.8+
+  PHP: 7.4+
+  MySQL: Padrão WordPress
+  Navegador: Qualquer moderno (Chrome, Firefox, Edge, Safari)
+
+ETIQUETA:
+  Dimensões: 106mm x 52mm
+  Orientação: Paisagem
+  Conteúdo: QR Code + 10 dígitos + Data
+
+IMPRESSORA:
+  Modelo: Argox 2140
+  Conexão: USB / Rede / Serial
+  Resolução: Alta (300+ DPI)
+
+═══════════════════════════════════════════════════════════════════
+📞 DÚVIDAS? CONSULTE:
+═══════════════════════════════════════════════════════════════════
+
+📄 INSTALACAO_RAPIDA.md
+   └─ Guia passo-a-passo
+
+📄 RESUMO_PLUGIN.md
+   └─ Visão geral técnica
+
+📄 qr-etiqueta-plugin/README.md
+   └─ Documentação completa
+
+═══════════════════════════════════════════════════════════════════
+✅ VOCÊ ESTÁ PRONTO PARA COMEÇAR!
+═══════════════════════════════════════════════════════════════════
+
+Próximos passos:
+
+1. Copie "qr-etiqueta-plugin" para wp-content/plugins/
+2. Ative o plugin no WordPress
+3. Gere um QR code de teste
+4. Configure a impressora Argox 2140
+5. Imprima uma etiqueta teste
+6. Verifique se o QR escaneia
+7. Pronto! ✨
+
+═══════════════════════════════════════════════════════════════════
+Sucesso! O plugin está totalmente funcional e pronto para uso.
+═══════════════════════════════════════════════════════════════════

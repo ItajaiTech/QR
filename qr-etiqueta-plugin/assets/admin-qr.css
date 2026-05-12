@@ -1,0 +1,138 @@
+/* Admin QR Etiqueta Styles */
+
+.qr-container {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 30px;
+	margin-top: 20px;
+}
+
+@media (max-width: 1024px) {
+	.qr-container {
+		grid-template-columns: 1fr;
+	}
+}
+
+.qr-form-section,
+.qr-preview-section {
+	background: white;
+	padding: 20px;
+	border-radius: 8px;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.qr-form-section h2,
+.qr-preview-section h2 {
+	margin-top: 0;
+	margin-bottom: 20px;
+	color: #333;
+	border-bottom: 2px solid #007cba;
+	padding-bottom: 10px;
+}
+
+.form-group {
+	margin-bottom: 20px;
+}
+
+.form-group label {
+	display: block;
+	margin-bottom: 8px;
+	font-weight: bold;
+	color: #333;
+}
+
+.form-group input {
+	width: 100%;
+	padding: 12px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	font-size: 16px;
+	box-sizing: border-box;
+}
+
+.form-group input:focus {
+	outline: none;
+	border-color: #007cba;
+	box-shadow: 0 0 0 3px rgba(0, 124, 186, 0.1);
+}
+
+.form-group .description {
+	margin-top: 5px;
+	font-size: 12px;
+	color: #666;
+}
+
+.form-actions {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+	margin-top: 20px;
+}
+
+.form-actions .button {
+	padding: 10px 20px;
+}
+
+.spinner {
+	display: inline-block;
+	width: 20px;
+	height: 20px;
+	background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.3"/><path d="M12 2A10 10 0 0 1 22 12" stroke-opacity="0.8"/></svg>') no-repeat center;
+	background-size: contain;
+	animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.qr-preview {
+	min-height: 300px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: #f5f5f5;
+	border-radius: 4px;
+	border: 2px dashed #ddd;
+}
+
+.qr-preview .placeholder {
+	color: #999;
+	text-align: center;
+	font-style: italic;
+}
+
+.qr-preview img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+.qr-actions {
+	margin-top: 15px;
+	display: flex;
+	gap: 10px;
+}
+
+.qr-actions .button {
+	flex: 1;
+}
+
+.notice {
+	padding: 12px;
+	margin: 20px 0 0 0;
+	border-left: 4px solid #dc3545;
+	background: #f8d7da;
+	border-radius: 4px;
+	color: #721c24;
+}
+
+.notice.success {
+	border-left-color: #28a745;
+	background: #d4edda;
+	color: #155724;
+}
