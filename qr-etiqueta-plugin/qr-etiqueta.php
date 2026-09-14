@@ -3,7 +3,7 @@
  * Plugin Name: QR Etiqueta Argox
  * Plugin URI: https://example.com/qr-etiqueta
  * Description: Gera QR codes otimizados para impressão em etiquetas Argox 2140 (106x52mm) com 10 dígitos
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Admin
  * License: GPL v2 or later
  * Requires at least: 5.8
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Definir constantes do plugin
 define( 'QR_ETIQUETA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'QR_ETIQUETA_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-define( 'QR_ETIQUETA_VERSION', '1.0.0' );
+define( 'QR_ETIQUETA_VERSION', '1.0.1' );
 
 // Incluir arquivos do plugin
 require_once QR_ETIQUETA_PLUGIN_DIR . 'includes/qr-generator.php';
@@ -192,6 +192,36 @@ function qr_etiqueta_ajax_gerar_qr() {
 		wp_send_json_error( __( 'Nenhum código numérico válido', 'qr-etiqueta' ) );
 	}
 
+	// Não gerar QR code quando houver números repetidos no formulário.
+	$contagem_codigos = array_count_values( $codigos_validos );
+	$codigos_repetidos = array_keys( array_filter( $contagem_codigos, function( $quantidade ) {
+		return $quantidade > 1;
+	} ) );
+
+	if ( ! empty( $codigos_repetidos ) ) {
+		wp_send_json_error( sprintf(
+			__( 'Número(s) repetido(s): %s. Remova a repetição para continuar.', 'qr-etiqueta' ),
+			implode( ', ', $codigos_repetidos )
+		) );
+	}
+
+	// Avisar antes da geração quando algum número já constar no histórico.
+	global $wpdb;
+	$table = $wpdb->prefix . 'qr_etiqueta_historico';
+	$placeholders = implode( ', ', array_fill( 0, count( $codigos_validos ), '%s' ) );
+	$consulta_existentes = $wpdb->prepare(
+		"SELECT codigo FROM $table WHERE codigo IN ($placeholders)",
+		$codigos_validos
+	);
+	$codigos_existentes = $wpdb->get_col( $consulta_existentes );
+
+	if ( ! empty( $codigos_existentes ) ) {
+		wp_send_json_error( sprintf(
+			__( 'Número(s) já utilizado(s): %s. Informe outro número para continuar.', 'qr-etiqueta' ),
+			implode( ', ', $codigos_existentes )
+		) );
+	}
+
 	// Gerar QR code com sequência (quebra de linha entre os números)
 	$generator = new QR_Etiqueta_Generator();
 	$qr_data = implode( "\n", $codigos_validos );
@@ -201,8 +231,6 @@ function qr_etiqueta_ajax_gerar_qr() {
 	$image_url = $generator->gerar_url_google_charts( $qr_data, $qr_size );
 
 	// Salvar cada código no histórico
-	global $wpdb;
-	$table = $wpdb->prefix . 'qr_etiqueta_historico';
 	foreach ( $codigos_validos as $codigo ) {
 		$wpdb->insert(
 			$table,

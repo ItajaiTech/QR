@@ -53,6 +53,25 @@ jQuery(document).ready(function($) {
 			return;
 		}
 
+		const codigosArray = codigos.split(/\r?\n/).map(function(codigo) {
+			return codigo.trim();
+		}).filter(Boolean);
+		const codigosRepetidos = codigosArray.filter(function(codigo, indice) {
+			return codigosArray.indexOf(codigo) !== indice;
+		}).filter(function(codigo, indice, lista) {
+			return lista.indexOf(codigo) === indice;
+		});
+
+		if (codigosArray.length > 50) {
+			mostrarErro('Máximo de 50 códigos por vez');
+			return;
+		}
+
+		if (codigosRepetidos.length) {
+			mostrarErro('Número(s) repetido(s): ' + codigosRepetidos.join(', ') + '. Remova a repetição para continuar.');
+			return;
+		}
+
 		$loading.show();
 		$result.hide();
 		$error.hide();
