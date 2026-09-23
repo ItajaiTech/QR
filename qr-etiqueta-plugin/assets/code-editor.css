@@ -1,0 +1,53 @@
+.qr-code-editor {
+    display: flex;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+    background: #fff;
+}
+.qr-code-editor:focus-within {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+}
+.qr-code-editor .qr-line-numbers {
+    flex: 0 0 3.5em;
+    box-sizing: border-box;
+    overflow: hidden;
+    padding: 10px 8px;
+    border-right: 2px solid #f0a34a;
+    background: #f0f0f0;
+    color: #757575;
+    text-align: right;
+    white-space: pre;
+    user-select: none;
+}
+.qr-code-editor .qr-line-numbers,
+.qr-code-editor textarea {
+    font: 14px/22px Consolas, 'Courier New', monospace;
+    letter-spacing: normal;
+}
+.qr-code-editor textarea {
+    display: block;
+    flex: 1 1 0;
+    min-width: 0;
+    width: 100%;
+    max-width: none;
+    min-height: 196px;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 10px;
+    border: 0;
+    border-radius: 0;
+    background: #fff;
+    color: #1d2327;
+    white-space: pre;
+    overflow: auto;
+    resize: vertical;
+}
+.qr-code-editor textarea:focus {
+    outline: none;
+    border: 0;
+    box-shadow: none;
+}

@@ -3,7 +3,7 @@
  * Plugin Name: QR Etiqueta Argox
  * Plugin URI: https://example.com/qr-etiqueta
  * Description: Gera QR codes otimizados para impressão em etiquetas Argox 2140 (106x52mm) com 10 dígitos
- * Version: 1.0.2
+ * Version: 1.0.3
  * Author: Admin
  * License: GPL v2 or later
  * Requires at least: 5.8
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Definir constantes do plugin
 define( 'QR_ETIQUETA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'QR_ETIQUETA_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-define( 'QR_ETIQUETA_VERSION', '1.0.2' );
+define( 'QR_ETIQUETA_VERSION', '1.0.3' );
 
 // Incluir arquivos do plugin
 require_once QR_ETIQUETA_PLUGIN_DIR . 'includes/qr-generator.php';
@@ -121,6 +121,7 @@ function qr_etiqueta_enqueue_admin_assets( $hook ) {
 	if ( ! in_array( $hook, [ 'toplevel_page_qr-etiqueta', 'qr-etiqueta_page_qr-etiqueta-historico', 'qr-etiqueta_page_qr-etiqueta-settings' ] ) ) {
 		return;
 	}
+	qr_etiqueta_enqueue_code_editor();
 
 	wp_enqueue_style(
 		'qr-etiqueta-admin',
@@ -295,8 +296,14 @@ add_shortcode( 'qr_etiqueta', 'qr_etiqueta_shortcode' );
 /**
  * Enfileirar scripts frontend quando shortcode é usado
  */
+function qr_etiqueta_enqueue_code_editor() {
+	wp_enqueue_style( 'qr-etiqueta-editor', QR_ETIQUETA_PLUGIN_URL . 'assets/code-editor.css', [], QR_ETIQUETA_VERSION );
+	wp_enqueue_script( 'qr-etiqueta-editor', QR_ETIQUETA_PLUGIN_URL . 'assets/code-editor.js', [], QR_ETIQUETA_VERSION, true );
+}
+
 function qr_etiqueta_enqueue_frontend_assets() {
 	if ( is_singular() && has_shortcode( get_post()->post_content, 'qr_etiqueta' ) ) {
+		qr_etiqueta_enqueue_code_editor();
 		wp_enqueue_style(
 			'qr-etiqueta-frontend',
 			QR_ETIQUETA_PLUGIN_URL . 'assets/frontend-qr.css',
