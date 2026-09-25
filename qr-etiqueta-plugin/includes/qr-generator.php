@@ -11,7 +11,117 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once __DIR__ . '/fpdf.php';
 
 class QR_Etiqueta_Generator {
+	/** Permitir compensar a orientação de alimentação configurada na impressora. */
+	public function adicionar_controle_orientacao( $html, $width, $height ) {
+		$width = floatval( $width );
+		$height = floatval( $height );
+		$controls = '<style>
+		.orientation-control{position:fixed;left:8px;bottom:8px;z-index:1001;background:white;padding:6px;font:13px Arial}
+		@media print{.orientation-control{display:none!important}}
+		</style><style id="qr-orientation-style"></style>
+		<div class="orientation-control"><label for="qr-orientation">Orientação: </label><select id="qr-orientation"><option value="landscape">Paisagem</option><option value="portrait">Retrato</option></select></div>
+		<script>(function(){
+		var width=' . $width . ', height=' . $height . ';
+		var sheet=document.querySelector(".label-sheet, .individual-sheet");
+		var select=document.getElementById("qr-orientation");
+		function applyOrientation(){
+			var rotated=(select.value==="landscape") !== (width>=height);
+			var w=rotated?height:width, h=rotated?width:height;
+			document.getElementById("qr-orientation-style").textContent=
+				"@page{size:"+w+"mm "+h+"mm;margin:0}"+
+				"@media print{html,body{width:"+w+"mm!important;height:"+h+"mm!important;max-height:"+h+"mm!important;overflow:hidden!important}}";
+			sheet.style.transformOrigin="top left";
+			sheet.style.transform=rotated?"translateX("+height+"mm) rotate(90deg)":"none";
+			if(sheet.parentElement!==document.body){sheet.parentElement.style.overflow="visible";}
+		}
+		select.addEventListener("change",applyOrientation);
+		applyOrientation();
+		})();</script>';
+		return str_replace( '</body>', $controls . '</body>', $html );
+	}
 	
+	/** Layout compartilhado pela visualização, impressão e PDF. */
+	public function layout_individual( $data ) {
+		$codes = array_values( array_filter( array_map( 'trim', preg_split( '/\r\n|\r|\n/', $data ) ), 'strlen' ) );
+		if ( count( $codes ) < 1 || count( $codes ) > 10 || count( array_unique( $codes ) ) !== count( $codes ) ) {
+			throw new InvalidArgumentException( 'Informe de 1 a 10 números diferentes para o bipe individual.' );
+		}
+		foreach ( $codes as $code ) {
+			if ( ! preg_match( '/^\d+$/', $code ) ) {
+				throw new InvalidArgumentException( 'Cada linha deve conter apenas números.' );
+			}
+		}
+		$s = qrEtiquetaGetSettings();
+		$w = $s['paper_width_mm'];
+		$h = $s['paper_height_mm'];
+		$m = max( 2, $s['safe_margin_mm'] );
+		// O modo individual usa a etiqueta inteira para acomodar os dez códigos.
+		$best = null;
+		for ( $cols = 1; $cols <= count( $codes ); $cols++ ) {
+			$rows = ceil( count( $codes ) / $cols );
+			$cw = ( $w - 2 * $m ) / $cols;
+			$ch = ( $h - 2 * $m ) / $rows;
+			$font = min( 3.0, ( $cw - 1 ) / ( max( array_map( 'strlen', $codes ) ) * 0.6 ) );
+			$qr = min( $cw - 1, $ch - $font * 1.3 - 1, $s['qr_size_mm'] );
+			if ( null === $best || $qr > $best['qr'] ) {
+				$best = compact( 'codes', 'w', 'h', 'm', 'cols', 'rows', 'cw', 'ch', 'font', 'qr' );
+			}
+		}
+		if ( $best['qr'] < 8 || $best['font'] < 1.2 ) {
+			throw new InvalidArgumentException( 'Os códigos não cabem com tamanho legível nesta etiqueta. Use menos códigos ou aumente as dimensões da etiqueta.' );
+		}
+		// Centralizar a grade compacta como um bloco, com folga igual nas bordas.
+		$best['cw'] = max( $best['qr'], max( array_map( 'strlen', $codes ) ) * $best['font'] * 0.6 ) + 1;
+		$best['ch'] = $best['qr'] + $best['font'] * 1.3 + 1;
+		$best['offset_x'] = ( $w - $best['cw'] * $best['cols'] ) / 2;
+		$best['offset_y'] = ( $h - $best['ch'] * $best['rows'] ) / 2;
+		return $best;
+	}
+
+	public function gerar_grade_individual( $data ) {
+		$l = $this->layout_individual( $data );
+		$html = '<div style="max-width:100%;overflow:auto"><div class="individual-sheet" style="box-sizing:border-box;background:white;width:' . $l['w'] . 'mm;height:' . $l['h'] . 'mm;padding:' . $l['m'] . 'mm;display:grid;justify-content:center;align-content:center;grid-template-columns:repeat(' . $l['cols'] . ',' . $l['cw'] . 'mm);grid-template-rows:repeat(' . $l['rows'] . ',' . $l['ch'] . 'mm)">';
+		foreach ( $l['codes'] as $code ) {
+			$url = $this->gerar_url_google_charts( $code, 300 ) . '&ecLevel=M';
+			$html .= '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0">';
+			$html .= '<img alt="QR ' . esc_attr( $code ) . '" src="' . esc_attr( $url ) . '" style="display:block;margin:0;width:' . $l['qr'] . 'mm;height:' . $l['qr'] . 'mm">';
+			$html .= '<div style="margin:0;white-space:nowrap;color:#000;font-family:Courier,monospace;font-weight:700;text-align:center;font-size:' . $l['font'] . 'mm;line-height:1.3">' . esc_html( $code ) . '</div></div>';
+		}
+		return $html . '</div></div>';
+	}
+
+	public function gerar_html_individual( $data ) {
+		$l = $this->layout_individual( $data );
+		return '<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Etiqueta - Bipe individual</title><style>
+		@page {size:' . $l['w'] . 'mm ' . $l['h'] . 'mm;margin:0}
+		html,body{margin:0;padding:0} .individual-sheet{break-inside:avoid}
+		.print-controls{margin:12px} @media print{.print-controls{display:none}}
+		</style><body>' . $this->gerar_grade_individual( $data ) . '<div class="print-controls"><button id="print" disabled onclick="window.print()">Carregando QR codes...</button><span id="error"></span></div>
+		<script>window.addEventListener("load",function(){var ok=Array.from(document.images).every(function(img){return img.complete && img.naturalWidth>0;});document.getElementById("print").disabled=!ok;document.getElementById("print").textContent="Imprimir";if(!ok)document.getElementById("error").textContent="Falha ao carregar QR codes. Recarregue a página antes de imprimir.";});</script></body></html>';
+	}
+
+	public function gerar_pdf_individual( $data ) {
+		$l = $this->layout_individual( $data );
+		require_once __DIR__ . '/individual-pdf.php';
+		$pdf = new QR_Etiqueta_Individual_PDF( $l['w'], $l['h'] );
+		$pdf->AddPage();
+		foreach ( $l['codes'] as $i => $code ) {
+			$file = $this->download_qr_image( $this->gerar_url_google_charts( $code, 300 ) . '&ecLevel=M' );
+			if ( ! $file ) {
+				throw new RuntimeException( 'Não foi possível carregar todos os QR codes. Tente novamente.' );
+			}
+			try {
+				$x = $l['offset_x'] + ( $i % $l['cols'] ) * $l['cw'];
+				$y = $l['offset_y'] + floor( $i / $l['cols'] ) * $l['ch'] + ( $l['ch'] - $l['qr'] - $l['font'] * 1.3 ) / 2;
+				$pdf->Image( $file, $x + ( $l['cw'] - $l['qr'] ) / 2, $y, $l['qr'], $l['qr'], 'PNG' );
+				$pdf->numero( $x + ( $l['cw'] - strlen( $code ) * $l['font'] * 0.6 ) / 2, $y + $l['qr'] + $l['font'], $code, $l['font'] );
+			} finally {
+				unlink( $file );
+			}
+		}
+		$pdf->Output( 'D', 'etiqueta-individual-' . date( 'YmdHis' ) . '.pdf' );
+	}
+
 	/**
 	 * Gerar QR code em SVG
 	 *

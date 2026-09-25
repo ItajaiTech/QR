@@ -15,6 +15,7 @@ jQuery(document).ready(function($) {
 	const $downloadPdfBtn = $('#download-pdf-btn-frontend');
 	const $newBtn = $('#new-btn-frontend');
 
+	const $individual = $('#bipe-individual-frontend');
 	let currentQRData = null;
 
 	// Enviar formulário
@@ -62,8 +63,13 @@ jQuery(document).ready(function($) {
 			return lista.indexOf(codigo) === indice;
 		});
 
-		if (codigosArray.length > 50) {
-			mostrarErro('Máximo de 50 códigos por vez');
+		const limite = $individual.prop('checked') ? 10 : 50;
+		if (codigosArray.some(codigo => !/^\d+$/.test(codigo))) {
+			mostrarErro('Cada linha deve conter apenas números.');
+			return;
+		}
+		if (codigosArray.length > limite) {
+			mostrarErro('Máximo de ' + limite + ' códigos por vez');
 			return;
 		}
 
@@ -84,6 +90,7 @@ jQuery(document).ready(function($) {
 				action: 'qr_etiqueta_gerar_qr',
 				nonce: qrEtiquetaParams.nonce,
 				codigos: codigos,
+				bipe_individual: $individual.prop('checked') ? '1' : '0',
 			},
 			success: function(response) {
 				if (response.success) {
@@ -107,6 +114,10 @@ jQuery(document).ready(function($) {
 	 * Exibir QR code
 	 */
 	function exibirQRCode(data) {
+		if (data.bipe_individual) {
+			$preview.html(data.preview_html);
+			return;
+		}
 		let html = '<div style="text-align: center;">';
 		html += '<img src="' + escapeHtml(data.image_url) + '" alt="QR Code" style="max-width: 300px; margin: 20px auto;">';
 		html += '<div style="margin-top: 15px; background: #f5f5f5; padding: 10px; border-radius: 4px;">';
@@ -129,7 +140,7 @@ jQuery(document).ready(function($) {
 		const printUrl = qrEtiquetaParams.ajaxUrl +
 			'?action=qr_etiqueta_print_qr' +
 			'&print=1' +
-			'&qr_data=' + encodeURIComponent(currentQRData.qr_data);
+			'&qr_data=' + encodeURIComponent(currentQRData.qr_data) + '&bipe_individual=' + (currentQRData.bipe_individual ? '1' : '0');
 		window.open(printUrl, '_blank', 'width=420,height=240,scrollbars=no,resizable=yes');
 	}
 
@@ -139,7 +150,7 @@ jQuery(document).ready(function($) {
 	function baixarPDF() {
 		const downloadUrl = qrEtiquetaParams.ajaxUrl + 
 			'?action=qr_etiqueta_download_pdf' + 
-			'&qr_data=' + encodeURIComponent(currentQRData.qr_data);
+			'&qr_data=' + encodeURIComponent(currentQRData.qr_data) + '&bipe_individual=' + (currentQRData.bipe_individual ? '1' : '0');
 		
 		window.open(downloadUrl, '_blank');
 	}

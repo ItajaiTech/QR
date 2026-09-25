@@ -58,6 +58,8 @@ function qr_etiqueta_render_admin_page() {
 						</p>
 					</div>
 
+<p><label><input type="checkbox" id="bipe-individual" name="bipe_individual" value="1"> Bipe individual</label><br>
+<small>Marque para gerar até 10 QR codes na mesma etiqueta, cada um com seu número abaixo. Bipe um código por linha e clique em Gerar QR Codes.</small></p>
 					<div class="form-actions">
 						<button type="submit" class="button button-primary" id="gerar-btn">
 							<?php echo esc_html__( 'Gerar QR Codes', 'qr-etiqueta' ); ?>

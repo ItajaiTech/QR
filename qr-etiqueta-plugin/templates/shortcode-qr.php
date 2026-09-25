@@ -28,6 +28,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<small><?php echo esc_html__( 'Um código por linha. Máximo 50 códigos. Números de qualquer tamanho.', 'qr-etiqueta' ); ?></small>
 			</div>
 
+<p><label><input type="checkbox" id="bipe-individual-frontend" name="bipe_individual" value="1"> Bipe individual</label><br>
+<small>Marque para gerar até 10 QR codes na mesma etiqueta, cada um com seu número abaixo. Bipe um código por linha e clique em Gerar QR Codes.</small></p>
 			<button type="submit" class="btn btn-primary">
 				<?php echo esc_html__( 'Gerar QR Codes', 'qr-etiqueta' ); ?>
 			</button>

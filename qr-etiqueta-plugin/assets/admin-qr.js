@@ -16,7 +16,9 @@ jQuery(document).ready(function($) {
 	const $downloadPdfBtn = $('#download-pdf-btn');
 	const $novoBtn = $('#novo-btn');
 
+	const $individual = $('#bipe-individual');
 	let currentQRData = null;
+	$novoBtn.on('click', resetarFormulario);
 
 	// Enviar formulário
 	$form.on('submit', function(e) {
@@ -59,8 +61,13 @@ jQuery(document).ready(function($) {
 			return lista.indexOf(codigo) === indice;
 		});
 
-		if (codigosArray.length > 50) {
-			showError('Máximo de 50 códigos por vez');
+		const limite = $individual.prop('checked') ? 10 : 50;
+		if (codigosArray.some(codigo => !/^\d+$/.test(codigo))) {
+			showError('Cada linha deve conter apenas números.');
+			return;
+		}
+		if (codigosArray.length > limite) {
+			showError('Máximo de ' + limite + ' códigos por vez');
 			return;
 		}
 
@@ -83,6 +90,7 @@ jQuery(document).ready(function($) {
 				action: 'qr_etiqueta_gerar_qr',
 				nonce: qrEtiquetaParams.nonce,
 				codigos: codigos,
+				bipe_individual: $individual.prop('checked') ? '1' : '0',
 			},
 			success: function(response) {
 				if (response.success) {
@@ -107,6 +115,11 @@ jQuery(document).ready(function($) {
 	 * Exibir QR code na preview
 	 */
 	function exibirQRCode(data) {
+		if (data.bipe_individual) {
+			$qrPreview.html(data.preview_html);
+			$qrActions.show();
+			return;
+		}
 		let html = '<div class="qr-code-display" style="text-align: center;">';
 		html += '<img src="' + escapeHtml(data.image_url) + '" alt="QR Code" style="max-width: 300px; margin: 20px auto;">';
 		html += '<div style="margin-top: 15px; background: #f5f5f5; padding: 10px; border-radius: 4px;">';
@@ -130,7 +143,7 @@ jQuery(document).ready(function($) {
 		const printUrl = qrEtiquetaParams.ajaxUrl +
 			'?action=qr_etiqueta_print_qr' +
 			'&print=1' +
-			'&qr_data=' + encodeURIComponent(data.qr_data);
+			'&qr_data=' + encodeURIComponent(data.qr_data) + '&bipe_individual=' + (data.bipe_individual ? '1' : '0');
 		window.open(printUrl, '_blank', 'width=420,height=240,scrollbars=no,resizable=yes');
 	}
 
@@ -141,7 +154,7 @@ jQuery(document).ready(function($) {
 		// Criar URL para download
 		const downloadUrl = qrEtiquetaParams.ajaxUrl + 
 			'?action=qr_etiqueta_download_pdf' + 
-			'&qr_data=' + encodeURIComponent(data.qr_data);
+			'&qr_data=' + encodeURIComponent(data.qr_data) + '&bipe_individual=' + (data.bipe_individual ? '1' : '0');
 		
 		// Abrir em nova aba para download
 		window.open(downloadUrl, '_blank');

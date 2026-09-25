@@ -271,3 +271,12 @@ GPL v2 ou posterior
 
 Impressora Argox 2140 / Etiqueta 106x52mm
 WordPress 5.8+
+# Bipe individual (versão 1.0.6)
+
+Números em preto e negrito, com fonte de até 3 mm, e grade compacta centralizada na etiqueta. A impressão e o PDF mantêm o mesmo posicionamento.
+
+Na janela da etiqueta, escolha **Orientação: Paisagem ou Retrato** antes de clicar em **Imprimir**. Essa escolha fica na própria página, mesmo quando o Chrome não mostra a opção de orientação no diálogo da impressora. Paisagem é o padrão. A mudança gira os QR e os números juntos e troca as dimensões da página para manter uma única etiqueta.
+
+Marque **Bipe individual**, bipe até 10 memórias (um número por linha) e clique em **Gerar QR Codes**. Depois use **Imprimir** ou **Baixar PDF**. Cada QR contém somente o número daquela memória, impresso logo abaixo, preservando zeros à esquerda.
+
+O modo individual ocupa a etiqueta inteira, respeitando as dimensões e margens configuradas. No tamanho padrão de 100 × 50,3 mm, dez códigos ficam em cinco colunas e duas linhas. A geração avisa se os números não couberem com tamanho legível. Imprima em escala de 100%, no tamanho configurado, sem cabeçalhos e rodapés. Desmarcado, o formulário mantém a geração de um QR com a sequência de até 50 códigos.

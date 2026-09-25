@@ -3,7 +3,7 @@
  * Plugin Name: QR Etiqueta Argox
  * Plugin URI: https://example.com/qr-etiqueta
  * Description: Gera QR codes otimizados para impressão em etiquetas Argox 2140 (106x52mm) com 10 dígitos
- * Version: 1.0.3
+ * Version: 1.0.6
  * Author: Admin
  * License: GPL v2 or later
  * Requires at least: 5.8
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Definir constantes do plugin
 define( 'QR_ETIQUETA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'QR_ETIQUETA_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-define( 'QR_ETIQUETA_VERSION', '1.0.3' );
+define( 'QR_ETIQUETA_VERSION', '1.0.6' );
 
 // Incluir arquivos do plugin
 require_once QR_ETIQUETA_PLUGIN_DIR . 'includes/qr-generator.php';
@@ -170,8 +170,9 @@ function qr_etiqueta_ajax_gerar_qr() {
 	}
 
 	// Processar múltiplos códigos (um por linha)
-	$codigos_array = array_filter( array_map( 'trim', preg_split( '/\r\n|\r|\n/', $codigos_raw ) ) );
-	$max_codigos = 50;
+	$codigos_array = array_filter( array_map( 'trim', preg_split( '/\r\n|\r|\n/', $codigos_raw ) ), 'strlen' );
+	$individual = isset( $_POST['bipe_individual'] ) && '1' === $_POST['bipe_individual'];
+	$max_codigos = $individual ? 10 : 50;
 
 	if ( empty( $codigos_array ) ) {
 		wp_send_json_error( __( 'Nenhum código válido encontrado', 'qr-etiqueta' ) );
@@ -191,6 +192,10 @@ function qr_etiqueta_ajax_gerar_qr() {
 
 	if ( empty( $codigos_validos ) ) {
 		wp_send_json_error( __( 'Nenhum código numérico válido', 'qr-etiqueta' ) );
+	}
+
+	if ( $individual && count( $codigos_validos ) !== count( $codigos_array ) ) {
+		wp_send_json_error( 'Cada linha deve conter apenas números.' );
 	}
 
 	// Não gerar QR code quando houver números repetidos no formulário.
@@ -214,7 +219,15 @@ function qr_etiqueta_ajax_gerar_qr() {
 	$qr_size = function_exists( 'qrEtiquetaMmToPixels203dpi' ) ? qrEtiquetaMmToPixels203dpi( $qr_size_mm ) : 400;
 	$image_url = $generator->gerar_url_google_charts( $qr_data, $qr_size );
 
+	try {
+		$preview_html = $individual ? $generator->gerar_grade_individual( $qr_data ) : '';
+	} catch ( InvalidArgumentException $e ) {
+		wp_send_json_error( $e->getMessage() );
+	}
+
 	wp_send_json_success( [
+		'bipe_individual' => $individual,
+		'preview_html' => $preview_html,
 		'qr_data'       => $qr_data,
 		'codigos'       => $codigos_validos,
 		'quantidade'    => count( $codigos_validos ),
@@ -247,7 +260,16 @@ function qr_etiqueta_print_qr() {
 	$qr_size_mm = isset( $settings['qr_size_mm'] ) ? floatval( $settings['qr_size_mm'] ) : 49.3;
 	$qr_size = function_exists( 'qrEtiquetaMmToPixels203dpi' ) ? qrEtiquetaMmToPixels203dpi( $qr_size_mm ) : 400;
 	$image_url = $generator->gerar_url_google_charts( $qr_data, $qr_size );
-	echo $generator->gerar_html_impressao( $qr_data, $image_url );
+	if ( isset( $_GET['bipe_individual'] ) && '1' === $_GET['bipe_individual'] ) {
+		try {
+			$layout = $generator->layout_individual( $qr_data );
+			echo $generator->adicionar_controle_orientacao( $generator->gerar_html_individual( $qr_data ), $layout['w'], $layout['h'] );
+		} catch ( InvalidArgumentException $e ) {
+			wp_die( esc_html( $e->getMessage() ) );
+		}
+	} else {
+		echo $generator->adicionar_controle_orientacao( $generator->gerar_html_impressao( $qr_data, $image_url ), $settings['paper_width_mm'], $settings['paper_height_mm'] );
+	}
 	exit;
 }
 add_action( 'wp_ajax_nopriv_qr_etiqueta_print_qr', 'qr_etiqueta_print_qr' );
@@ -272,7 +294,11 @@ function qr_etiqueta_download_pdf() {
 		$qr_size_mm = isset( $settings['qr_size_mm'] ) ? floatval( $settings['qr_size_mm'] ) : 49.3;
 		$qr_size = function_exists( 'qrEtiquetaMmToPixels203dpi' ) ? qrEtiquetaMmToPixels203dpi( $qr_size_mm ) : 400;
 		$image_url = $generator->gerar_url_google_charts( $qr_data, $qr_size );
-		$generator->gerar_pdf_download( $qr_data, $image_url );
+		if ( isset( $_GET['bipe_individual'] ) && '1' === $_GET['bipe_individual'] ) {
+			$generator->gerar_pdf_individual( $qr_data );
+		} else {
+			$generator->gerar_pdf_download( $qr_data, $image_url );
+		}
 		exit;
 	} catch ( Throwable $e ) {
 		if ( function_exists( 'error_log' ) ) {
